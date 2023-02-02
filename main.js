@@ -39,7 +39,9 @@ var projectionETRS89 = new Projection({
 
 var extentBerlin = [-2465144.80, 4102893.55, 776625.76, 9408555.22];
 
-var vectorSource = new VectorSource({
+// definition of vector layer sources
+
+var vectorGrundriss = new VectorSource({
     format: new GeoJSON(),
     url: function(extent) {
         return 'https://mymapnik.rudzick.it/geoserver/wfs?service=WFS&' +
@@ -50,9 +52,35 @@ var vectorSource = new VectorSource({
     strategy: bboxStrategy
 });
 
-var vector = new VectorLayer({
+// new vector layer for Farbgruppen // ==> source to be adjusted!
+var vectorSourceFG = new VectorSource({
+  format: new GeoJSON(),
+  url: function(extent) {
+      return 'https://mymapnik.rudzick.it/geoserver/wfs?service=WFS&' +
+          'version=1.1.0&request=GetFeature&typename=Kleingartenparzellen:planet_osm_polygon:Allmende_Kontor&' +
+          'outputFormat=application/json&srsname=EPSG:25833&' +
+          'bbox=' + extent.join(',') + ',EPSG:25833';
+  },
+  strategy: bboxStrategy
+});
+
+// new vector layer for Beete // ==> source to be adjusted!
+var vectorSourceBeete = new VectorSource({
+  format: new GeoJSON(),
+  url: function(extent) {
+      return 'https://mymapnik.rudzick.it/geoserver/wfs?service=WFS&' +
+          'version=1.1.0&request=GetFeature&typename=Kleingartenparzellen:planet_osm_polygon:Allmende_Kontor&' +
+          'outputFormat=application/json&srsname=EPSG:25833&' +
+          'bbox=' + extent.join(',') + ',EPSG:25833';
+  },
+  strategy: bboxStrategy
+});
+
+//////////////////////////////
+
+var vectorGrundriss = new VectorLayer({
 //    'title' : 'Allmende-Kontor',
-    source: vectorSource,
+    source: vectorSourceGrundriss,
     style: new Style({
         stroke: new Stroke({
             color: 'rgba(189, 2, 64, 1.0)',
@@ -66,6 +94,41 @@ var vector = new VectorLayer({
     updateWhileInteracting: true
 });
 
+
+
+var vectorFG = new VectorLayer({
+  //    'title' : 'Allmende-Kontor',
+      source: vectorSourceFG,
+      style: new Style({
+          stroke: new Stroke({
+              color: 'rgba(189, 2, 64, 1.0)',
+              width: 1
+          }),
+  //	fill: new Fill({
+  //	    color: 'rgba(189, 2, 64, 0.3)'
+  //	}),   
+      }),
+      renderMode: vector,
+      updateWhileInteracting: true
+  });
+
+var vectorBeete = new VectorLayer({
+  //    'title' : 'Allmende-Kontor',
+      source: vectorSourceBeete,
+      style: new Style({
+          stroke: new Stroke({
+              color: 'rgba(189, 2, 64, 1.0)',
+              width: 1
+          }),
+  //	fill: new Fill({
+  //	    color: 'rgba(189, 2, 64, 0.3)'
+  //	}),   
+      }),
+      renderMode: vector,
+      updateWhileInteracting: true
+  });
+
+// background Tiles (one tile for each year)
 var berlin1928 = new TileLayer({
     'title' : 'Luftbildkarte 1928',
      type: 'base',
@@ -376,7 +439,9 @@ var overlaysOSM = new LayerGroup({
     'title': 'Gemeinschaftsgarten Allmende-Kontor (OSM)',
     combine: true,
     fold: 'closed',
-    layers: [vector]
+    layers: [vectorGrundriss,
+      vectorFG,
+      vectorBeete]
 });
 
 
